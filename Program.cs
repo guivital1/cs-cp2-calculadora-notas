@@ -1,31 +1,25 @@
 using System.Globalization;
 
-internal class Program
+class Program
 {
-    const int QUANTIDADE_NOTAS = 3;
+    const int TOTAL_NOTAS = 3;
     const double MEDIA_APROVACAO = 7.0;
     const double MEDIA_RECUPERACAO = 5.0;
 
     static string nomeAluno = "";
-    static double[] notas = new double[QUANTIDADE_NOTAS];
-    static bool notasLancadas = false;
+    static double[] notas = new double[TOTAL_NOTAS];
+    static bool notasLancadas;
 
     static void Main()
     {
         while (true)
         {
-            Console.WriteLine("\n1 - Cadastrar aluno");
-            Console.WriteLine("2 - Lançar notas");
-            Console.WriteLine("3 - Calcular média");
-            Console.WriteLine("4 - Sair");
-            Console.Write("Opção: ");
-
+            Console.Write("\n1 - Cadastrar aluno\n2 - Lançar notas\n3 - Calcular média\n4 - Sair\nOpção: ");
             string? entrada = Console.ReadLine();
             if (entrada == null) return;
-
             if (!int.TryParse(entrada, out int opcao))
             {
-                Console.WriteLine("Opção inválida. Digite um número de 1 a 4.");
+                Console.WriteLine("Opção inválida.");
                 continue;
             }
 
@@ -34,44 +28,37 @@ internal class Program
                 case 1: CadastrarAluno(); break;
                 case 2: LancarNotas(); break;
                 case 3: CalcularMedia(); break;
-                case 4: Console.WriteLine("Até logo!"); return;
-                default: Console.WriteLine("Opção inválida. Escolha de 1 a 4."); break;
+                case 4: return;
+                default: Console.WriteLine("Opção inválida."); break;
             }
         }
     }
 
     static void CadastrarAluno()
     {
-        while (true)
+        Console.Write("Nome do aluno: ");
+        string? nomeInformado = Console.ReadLine();
+        if (string.IsNullOrWhiteSpace(nomeInformado))
         {
-            Console.Write("Nome do aluno: ");
-            string? nomeInformado = Console.ReadLine();
-            if (nomeInformado == null) return;
-
-            if (string.IsNullOrWhiteSpace(nomeInformado))
-            {
-                Console.WriteLine("Nome inválido. Digite um nome.");
-                continue;
-            }
-
-            nomeAluno = nomeInformado.Trim();
-            notasLancadas = false;
-            Array.Clear(notas);
-            Console.WriteLine($"Aluno {nomeAluno} cadastrado.");
+            Console.WriteLine("Nome inválido.");
             return;
         }
+
+        nomeAluno = nomeInformado.Trim();
+        notasLancadas = false;
+        Console.WriteLine("Aluno cadastrado.");
     }
 
     static void LancarNotas()
     {
         if (nomeAluno == "")
         {
-            Console.WriteLine("Cadastre um aluno antes de lançar notas.");
+            Console.WriteLine("Cadastre um aluno primeiro.");
             return;
         }
 
         notasLancadas = false;
-        for (int indice = 0; indice < QUANTIDADE_NOTAS; indice++)
+        for (int indice = 0; indice < TOTAL_NOTAS; indice++)
         {
             while (true)
             {
@@ -79,18 +66,15 @@ internal class Program
                 string? entrada = Console.ReadLine();
                 if (entrada == null) return;
 
-                if (!double.TryParse(entrada.Replace(',', '.'), CultureInfo.InvariantCulture,
-                    out double nota) || !double.IsFinite(nota) || nota < 0 || nota > 10)
+                if (double.TryParse(entrada.Replace(',', '.'), CultureInfo.InvariantCulture,
+                    out double nota) && nota >= 0 && nota <= 10)
                 {
-                    Console.WriteLine("Nota inválida. Digite um número de 0 a 10.");
-                    continue;
+                    notas[indice] = nota;
+                    break;
                 }
-
-                notas[indice] = nota;
-                break;
+                Console.WriteLine("Nota inválida. Digite um número de 0 a 10.");
             }
         }
-
         notasLancadas = true;
         Console.WriteLine("Notas registradas.");
     }
@@ -103,18 +87,15 @@ internal class Program
             return;
         }
 
-        double media = (notas[0] + notas[1] + notas[2]) / QUANTIDADE_NOTAS;
-        Console.WriteLine($"Aluno: {nomeAluno} | Média: {media:F2}");
+        double media = (notas[0] + notas[1] + notas[2]) / TOTAL_NOTAS;
+        Console.WriteLine($"{nomeAluno} - Média: {media:F2}");
         ExibirSituacao(media);
     }
 
     static void ExibirSituacao(double media)
     {
-        if (media >= MEDIA_APROVACAO)
-            Console.WriteLine("Situação: Aprovado");
-        else if (media >= MEDIA_RECUPERACAO)
-            Console.WriteLine("Situação: Recuperação");
-        else
-            Console.WriteLine("Situação: Reprovado");
+        if (media >= MEDIA_APROVACAO) Console.WriteLine("Aprovado");
+        else if (media >= MEDIA_RECUPERACAO) Console.WriteLine("Recuperação");
+        else Console.WriteLine("Reprovado");
     }
 }
