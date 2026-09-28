@@ -2,28 +2,26 @@ using System.Globalization;
 
 internal class Program
 {
-    private const int QUANTIDADE_NOTAS = 3;
-    private const double NOTA_MINIMA = 0.0;
-    private const double NOTA_MAXIMA = 10.0;
-    private const double MEDIA_APROVACAO = 7.0;
-    private const double MEDIA_RECUPERACAO = 5.0;
+    const int QUANTIDADE_NOTAS = 3;
+    const double MEDIA_APROVACAO = 7.0;
+    const double MEDIA_RECUPERACAO = 5.0;
 
-    private static string? nomeAluno;
-    private static readonly double[] notas = new double[QUANTIDADE_NOTAS];
-    private static bool notasLancadas;
+    static string nomeAluno = "";
+    static double[] notas = new double[QUANTIDADE_NOTAS];
+    static bool notasLancadas = false;
 
-    private static void Main()
+    static void Main()
     {
         while (true)
         {
-            ExibirMenu();
-            string? entrada = Console.ReadLine();
+            Console.WriteLine("\n1 - Cadastrar aluno");
+            Console.WriteLine("2 - Lançar notas");
+            Console.WriteLine("3 - Calcular média");
+            Console.WriteLine("4 - Sair");
+            Console.Write("Opção: ");
 
-            if (entrada is null)
-            {
-                Console.WriteLine("Entrada encerrada. Até logo!");
-                break;
-            }
+            string? entrada = Console.ReadLine();
+            if (entrada == null) return;
 
             if (!int.TryParse(entrada, out int opcao))
             {
@@ -33,146 +31,90 @@ internal class Program
 
             switch (opcao)
             {
-                case 1:
-                    CadastrarAluno();
-                    break;
-                case 2:
-                    LancarNotas();
-                    break;
-                case 3:
-                    if (nomeAluno is null || !notasLancadas)
-                    {
-                        Console.WriteLine("Cadastre um aluno e lance as três notas antes de calcular a média.");
-                        break;
-                    }
-
-                    double media = CalcularMedia();
-                    Console.WriteLine($"Aluno: {nomeAluno} | Média: {media:F2}");
-                    ExibirSituacao(media);
-                    break;
-                case 4:
-                    Console.WriteLine("Até logo!");
-                    return;
-                default:
-                    Console.WriteLine("Opção inválida. Escolha de 1 a 4.");
-                    break;
+                case 1: CadastrarAluno(); break;
+                case 2: LancarNotas(); break;
+                case 3: CalcularMedia(); break;
+                case 4: Console.WriteLine("Até logo!"); return;
+                default: Console.WriteLine("Opção inválida. Escolha de 1 a 4."); break;
             }
         }
     }
 
-    private static void ExibirMenu()
-    {
-        Console.WriteLine();
-        Console.WriteLine("=== Calculadora de Notas ===");
-        Console.WriteLine("1 - Cadastrar aluno");
-        Console.WriteLine("2 - Lançar notas");
-        Console.WriteLine("3 - Calcular média");
-        Console.WriteLine("4 - Sair");
-        Console.Write("Escolha uma opção: ");
-    }
-
-    private static void CadastrarAluno()
+    static void CadastrarAluno()
     {
         while (true)
         {
             Console.Write("Nome do aluno: ");
             string? nomeInformado = Console.ReadLine();
-
-            if (nomeInformado is null)
-            {
-                Console.WriteLine("Cadastro cancelado: entrada encerrada.");
-                return;
-            }
+            if (nomeInformado == null) return;
 
             if (string.IsNullOrWhiteSpace(nomeInformado))
             {
-                Console.WriteLine("Nome inválido. Digite um nome não vazio.");
+                Console.WriteLine("Nome inválido. Digite um nome.");
                 continue;
             }
 
             nomeAluno = nomeInformado.Trim();
             notasLancadas = false;
             Array.Clear(notas);
-            Console.WriteLine($"Aluno {nomeAluno} cadastrado. Lance as três notas.");
+            Console.WriteLine($"Aluno {nomeAluno} cadastrado.");
             return;
         }
     }
 
-    private static void LancarNotas()
+    static void LancarNotas()
     {
-        if (nomeAluno is null)
+        if (nomeAluno == "")
         {
-            Console.WriteLine("Cadastre um aluno antes de lançar as notas.");
+            Console.WriteLine("Cadastre um aluno antes de lançar notas.");
             return;
         }
 
-        double[] novasNotas = new double[QUANTIDADE_NOTAS];
-
+        notasLancadas = false;
         for (int indice = 0; indice < QUANTIDADE_NOTAS; indice++)
         {
             while (true)
             {
                 Console.Write($"Nota {indice + 1} (0 a 10): ");
                 string? entrada = Console.ReadLine();
+                if (entrada == null) return;
 
-                if (entrada is null)
-                {
-                    Console.WriteLine("Lançamento cancelado: entrada encerrada.");
-                    return;
-                }
-
-                bool numeroValido = double.TryParse(entrada, NumberStyles.Float,
-                    CultureInfo.CurrentCulture, out double nota);
-
-                // Aceita também ponto decimal quando a cultura do computador usa vírgula.
-                if (!numeroValido)
-                {
-                    numeroValido = double.TryParse(entrada, NumberStyles.Float,
-                        CultureInfo.InvariantCulture, out nota);
-                }
-
-                if (!numeroValido || !double.IsFinite(nota) ||
-                    nota < NOTA_MINIMA || nota > NOTA_MAXIMA)
+                if (!double.TryParse(entrada.Replace(',', '.'), CultureInfo.InvariantCulture,
+                    out double nota) || !double.IsFinite(nota) || nota < 0 || nota > 10)
                 {
                     Console.WriteLine("Nota inválida. Digite um número de 0 a 10.");
                     continue;
                 }
 
-                novasNotas[indice] = nota;
+                notas[indice] = nota;
                 break;
             }
         }
 
-        Array.Copy(novasNotas, notas, QUANTIDADE_NOTAS);
         notasLancadas = true;
-        Console.WriteLine("As três notas foram registradas.");
+        Console.WriteLine("Notas registradas.");
     }
 
-    private static double CalcularMedia()
+    static void CalcularMedia()
     {
-        double somaNotas = 0;
-
-        foreach (double nota in notas)
+        if (nomeAluno == "" || !notasLancadas)
         {
-            somaNotas += nota;
+            Console.WriteLine("Cadastre um aluno e lance as três notas primeiro.");
+            return;
         }
 
-        return somaNotas / QUANTIDADE_NOTAS;
+        double media = (notas[0] + notas[1] + notas[2]) / QUANTIDADE_NOTAS;
+        Console.WriteLine($"Aluno: {nomeAluno} | Média: {media:F2}");
+        ExibirSituacao(media);
     }
 
-    private static void ExibirSituacao(double media)
+    static void ExibirSituacao(double media)
     {
         if (media >= MEDIA_APROVACAO)
-        {
             Console.WriteLine("Situação: Aprovado");
-        }
         else if (media >= MEDIA_RECUPERACAO)
-        {
             Console.WriteLine("Situação: Recuperação");
-        }
         else
-        {
             Console.WriteLine("Situação: Reprovado");
-        }
     }
 }
