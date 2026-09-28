@@ -10,7 +10,7 @@ Requer o .NET SDK 8. Na pasta do projeto:
 dotnet run
 ```
 
-O menu permanece aberto até a opção `4 - Sair`. Cadastre o aluno antes de lançar as notas. Cada nota deve estar entre 0 e 10; são aceitos vírgula e ponto como separador decimal. Um novo cadastro limpa as notas do aluno anterior.
+O menu permanece aberto até a opção `4 - Sair`. Cadastre o aluno antes de lançar as notas. Cada nota deve estar entre 0 e 10. Para notas decimais, use o separador da configuração regional do computador. Um novo cadastro desconsidera as notas do aluno anterior.
 
 ## Critérios
 
